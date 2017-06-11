@@ -77,10 +77,10 @@ class UserBaseController {
                 def userInfo = new UserInfo()
                 userInfo.userBase = user
                 userInfo.save flush: true
-                //生成财富扩展
-                def userFortune = new UserFortune()
-                userFortune.userBase = user
-                userFortune.save flush: true
+                //生成账户扩展
+                def userAccount = new UserAccount()
+                userAccount.userBase = user
+                userAccount.save flush: true
 
                 //构造返回数据
                 def token = UserUtil.createToken(user.id)
@@ -107,8 +107,6 @@ class UserBaseController {
         if (UserUtil.checkToken(token)) {
             def userId = UserUtil.getUserId(token)
             def userBase = UserBase.get(userId)
-            def meiLi = UserMeiLi.findByUserBase(userBase)
-            userBase.ml = meiLi?.meiLi ?: 0
 
             map.isSuccess = true
             map.message = ""

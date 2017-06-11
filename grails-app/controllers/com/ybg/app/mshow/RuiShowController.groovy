@@ -384,9 +384,9 @@ class RuiShowController {
                         map.errorCode = "0"
                         map.data = "true"
                     } else {
-                        def userFortune = UserFortune.findByUserBase(userBase)
-                        if (userFortune.meiPiao >= show.price) {
-                            ruiShowService.payShow(userFortune, show)
+                        def userAccount = UserAccount.findByUserBase(userBase)
+                        if (userAccount.restMoney >= show.price) {
+                            ruiShowService.payShow(userAccount, show)
                             showViewHistoryService.create(show, userBase)
 
                             map.isSuccess = true

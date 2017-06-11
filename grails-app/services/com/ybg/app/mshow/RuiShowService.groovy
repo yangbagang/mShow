@@ -1,9 +1,6 @@
 package com.ybg.app.mshow
 
-import com.ybg.app.utils.MeiliConstant
-import com.ybg.app.utils.MsgPushHelper
 import com.ybg.app.utils.UserUtil
-import grails.converters.JSON
 import grails.transaction.Transactional
 
 @Transactional
@@ -17,19 +14,6 @@ class RuiShowService {
         showPing.userBase = userBase
         showPing.ping = content
         showPing.save flush: true
-        //计算积分，评论者获得活力值
-        def postMeiLi = getUserMeili(userBase)
-        postMeiLi.hl = postMeiLi.hl + MeiliConstant.POST_PING
-        postMeiLi.save flush: true
-
-        MeiLiHistory.createInstance(userBase, MeiliConstant.MEILI_HL, MeiliConstant.POST_PING, "评论", ruiShow.id, 0L)
-        //计算积分，被评论者获得人气值
-        def getMeiLi = getUserMeili(ruiShow.userBase)
-        getMeiLi.rq = getMeiLi.rq + MeiliConstant.GET_PING
-        getMeiLi.save flush: true
-
-        //创建历史记录
-        MeiLiHistory.createInstance(ruiShow.userBase, MeiliConstant.MEILI_RQ, MeiliConstant.GET_PING, "评论", ruiShow.id, userBase.id)
 
         //增加评论数量
         ruiShow.pingNum += 1
@@ -45,18 +29,6 @@ class RuiShowService {
         showZan.createTime = new Date()
         showZan.userBase = userBase
         showZan.save flush: true
-        //计算积分，赞者获得亲善值
-        def postMeiLi = getUserMeili(userBase)
-        postMeiLi.qs = postMeiLi.qs + MeiliConstant.POST_ZAN
-        postMeiLi.save flush: true
-
-        MeiLiHistory.createInstance(userBase, MeiliConstant.MEILI_QS, MeiliConstant.POST_ZAN, "赞", ruiShow.id, 0L)
-        //计算积分，被评论者获得人气值
-        def getMeiLi = getUserMeili(ruiShow.userBase)
-        getMeiLi.rq = getMeiLi.rq + MeiliConstant.GET_PING
-        getMeiLi.save flush: true
-
-        MeiLiHistory.createInstance(ruiShow.userBase, MeiliConstant.MEILI_RQ, MeiliConstant.GET_ZAN, "赞", ruiShow.id, userBase.id)
 
         ruiShow.zanNum += 1
         ruiShow.save flush: true
@@ -71,33 +43,11 @@ class RuiShowService {
         showShare.createTime = new Date()
         showShare.userBase = userBase
         showShare.save flush: true
-        //计算积分，分享者获得活力值
-        def postMeiLi = getUserMeili(userBase)
-        postMeiLi.hl = postMeiLi.hl + MeiliConstant.POST_SHARE
-        postMeiLi.save flush: true
-
-        MeiLiHistory.createInstance(userBase, MeiliConstant.MEILI_HL, MeiliConstant.POST_SHARE, "分享", ruiShow.id, 0L)
-        //计算积分，被评论者获得人气值
-        def getMeiLi = getUserMeili(ruiShow.userBase)
-        getMeiLi.rq = getMeiLi.rq + MeiliConstant.GET_SHARE
-        getMeiLi.save flush: true
-
-        MeiLiHistory.createInstance(ruiShow.userBase, MeiliConstant.MEILI_RQ, MeiliConstant.GET_SHARE, "分享", ruiShow.id, userBase.id)
 
         ruiShow.shareNum += 1
         ruiShow.save flush: true
 
         return ShowShare.countByShow(ruiShow)
-    }
-
-    def getUserMeili(UserBase userBase) {
-        def meili = UserMeiLi.findByUserBase(userBase)
-        if (!meili) {
-            meili = new UserMeiLi()
-            meili.userBase = userBase
-            meili.save flush: true
-        }
-        meili
     }
 
     def create(UserBase userBase, String thumbnail, String title, Short type, Integer price) {
@@ -110,12 +60,6 @@ class RuiShowService {
         show.price = price
         show.save flush: true
 
-        //计算活力值
-        def postMeiLi = getUserMeili(userBase)
-        postMeiLi.hl = postMeiLi.hl + MeiliConstant.POST_PHOTO_VIEW
-        postMeiLi.save flush: true
-
-        MeiLiHistory.createInstance(userBase, MeiliConstant.MEILI_HL, MeiliConstant.POST_PHOTO_VIEW, "发布", show.id, 0L)
         show
     }
 
@@ -144,59 +88,6 @@ class RuiShowService {
         map
     }
 
-    def createLive(UserBase userBase, RuiBar ruiBar, String thumbnail, String event) {
-        //生成实例
-        def show = new RuiShow()
-        show.userBase = userBase
-        show.ruiBar = ruiBar
-        show.thumbnail = thumbnail
-        show.title = event
-        show.type = Short.valueOf("3")
-        show.save flush: true
-
-        //计算活力值
-        def postMeiLi = getUserMeili(userBase)
-        postMeiLi.hl = postMeiLi.hl + MeiliConstant.POST_PHOTO_VIEW
-        postMeiLi.save flush: true
-
-        MeiLiHistory.createInstance(userBase, MeiliConstant.MEILI_HL, MeiliConstant.POST_PHOTO_VIEW, "发布", show.id, 0L)
-
-        //关联话题
-        def systemEvent = getEvent(event)
-        if (systemEvent && systemEvent.flag == Short.valueOf("1")) {
-            def ruiEvent = new RuiEvent()
-            ruiEvent.event = systemEvent
-            ruiEvent.show = show
-            ruiEvent.save flush: true
-        }
-        show
-    }
-
-    def sendLiveMsg(RuiShow ruiShow, UserBase userBase, Integer flag, Integer type, String content) {
-        if (flag == 1) {
-            sendMsg(userBase, ruiShow.userBase, content, type)
-        } else {
-            def userList = ShowViewHistory.findAllByShow(ruiShow)*.userBase
-            userList.each { user ->
-                sendMsg(userBase, user, content, type)
-            }
-        }
-    }
-
-    private static sendMsg(UserBase sendUser, UserBase receiverUser, String msg, Integer type) {
-        Thread.start {
-            def liveMsg = [:]
-            liveMsg.userBase = sendUser
-            liveMsg.msg = msg
-            liveMsg.type = type
-            def map = [:]
-            map.type = MsgPushHelper.LIVE_MSG
-            map.data = liveMsg
-            def content = map as JSON
-            MsgPushHelper.sendMsg(receiverUser.appToken, content.toString())
-        }
-    }
-
     private static getEvent(String event) {
         def systemEvent = SystemEvent.findByAction(event)
         if (systemEvent == null) {
@@ -207,16 +98,38 @@ class RuiShowService {
         systemEvent
     }
 
-    def payShow(UserFortune userFortune, RuiShow ruiShow) {
-        userFortune.meiPiao -= ruiShow.price
-        userFortune.save flush: true
-
-        def userFortuneHistory = new UserFortuneHistory()
-        userFortuneHistory.userBase = userFortune.userBase
-        userFortuneHistory.meiPiao = -ruiShow.price
-        userFortuneHistory.reasonType = 0
-        userFortuneHistory.reason = "ruiShow"
-        userFortuneHistory.save flush: true
+    def payShow(UserAccount userAccount, RuiShow ruiShow) {
+        //消费端减可用秀币
+        userAccount.restMoney -= ruiShow.price
+        userAccount.usedMoney += ruiShow.price
+        userAccount.save flush: true
+        //消费端记录消费历史
+        def userAccountHistory = new UserAccountHistory()
+        userAccountHistory.userBase = userAccount.userBase
+        userAccountHistory.ruiMoney = -ruiShow.price
+        userAccountHistory.reason = "消费"
+        userAccountHistory.reasonType = 2
+        userAccountHistory.save flush: true
+        //发布者增加可用秀币
+        def money = getIncomeNum(ruiShow.price)
+        def postAccount = UserAccount.findByUserBase(ruiShow.userBase)
+        postAccount.totalMoney += money
+        postAccount.restMoney += money
+        postAccount.save flush: true
+        //发布者增加秀币记录
+        def postAccountHistory = new UserAccountHistory()
+        postAccountHistory.userBase = userAccount.userBase
+        postAccountHistory.ruiMoney = money
+        postAccountHistory.reason = "收入"
+        postAccountHistory.reasonType = 4
+        postAccountHistory.save flush: true
     }
 
+    private Integer getIncomeNum(Integer price) {
+        def showConfigure = ShowConfigure.get(1)
+        if (showConfigure) {
+            return price*(1 - showConfigure.platformScale).intValue()
+        }
+        return price
+    }
 }

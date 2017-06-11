@@ -30,18 +30,19 @@ class OrderInfoService {
         transactionInfo.save flush: true
         orderInfo.save flush: true
 
-        //update meipiao
+        //update 秀币
         def userBase = orderInfo.userBase
-        def userFortune = UserFortune.findByUserBase(userBase)
-        userFortune.meiPiao += orderInfo.ruiCard.ruiMoney
-        userFortune.save flush: true
+        def userAccount = UserAccount.findByUserBase(userBase)
+        userAccount.totalMoney += orderInfo.ruiCard.ruiMoney
+        userAccount.restMoney += orderInfo.ruiCard.ruiMoney
+        userAccount.save flush: true
 
-        def userFortuneHistory = new UserFortuneHistory()
-        userFortuneHistory.userBase = userBase
-        userFortuneHistory.meiPiao = orderInfo.ruiCard.ruiMoney
-        userFortuneHistory.reasonType = 0
-        userFortuneHistory.reason = "chongzhi"
-        userFortuneHistory.save flush: true
+        def userAccountHistory = new UserAccountHistory()
+        userAccountHistory.userBase = userBase
+        userAccountHistory.ruiMoney = orderInfo.ruiCard.ruiMoney
+        userAccountHistory.reason = "充值"
+        userAccountHistory.reasonType = 1
+        userAccountHistory.save flush: true
     }
 
 }

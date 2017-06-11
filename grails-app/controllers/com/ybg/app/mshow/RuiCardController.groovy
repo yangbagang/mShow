@@ -5,7 +5,7 @@ import grails.converters.JSON
 class RuiCardController {
 
     /**
-     * 列出美票卡，用于美票充值
+     * 列出秀币卡，用于秀币充值
      * @return
      */
     def list() {
