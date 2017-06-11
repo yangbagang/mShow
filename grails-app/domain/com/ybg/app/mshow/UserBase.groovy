@@ -12,8 +12,7 @@ class UserBase {
         mobile nullable: true
         flag nullable: true
         ymMemo nullable: true
-        platform nullable: true
-        platformId nullable: true
+        tjUser nullable: true
         appToken nullable: true
     }
 
@@ -26,27 +25,8 @@ class UserBase {
     String mobile = ""//手机号
     Short flag = 1 as Short//是否有效1有效0无效
     String ymMemo = ""//宣言
-    String platform = ""//平台
-    String platformId = ""//平台ID
+    UserBase tjUser//推荐
     Date createTime = new Date()
     String appToken = ""
-    transient Integer ml
 
-    def copyInstance() {
-        def instance = new UserBase()
-        instance.id = this.id
-        instance.ymCode = this.ymCode
-        instance.ymUser = this.ymUser
-        instance.nickName = this.nickName
-        instance.avatar = this.avatar
-        instance.avatarBG = this.avatarBG
-        instance.mobile = this.mobile
-        instance.flag = this.flag
-        instance.ymMemo = this.ymMemo
-        instance.platform = this.platform
-        instance.platformId = this.platformId
-        instance.createTime = this.createTime
-        instance.appToken = this.appToken
-        instance
-    }
 }

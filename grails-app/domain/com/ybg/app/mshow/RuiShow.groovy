@@ -7,7 +7,6 @@ class RuiShow {
     static constraints = {
         thumbnail nullable: true
         title nullable: true
-        ruiBar nullable: true
     }
 
     String thumbnail = ""//缩略图
@@ -19,7 +18,6 @@ class RuiShow {
     Integer pingNum = 0//评论次数
     Integer zanNum = 0//赞次数
     Integer shareNum = 0//分享次数
-    RuiBar ruiBar
     Short flag = 1 as Short//标志，1可用，0不可用
     Integer price = 0//需要付多少钱才可以看。免费对应的价格为0。
 
