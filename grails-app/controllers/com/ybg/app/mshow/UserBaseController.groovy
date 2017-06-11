@@ -53,8 +53,9 @@ class UserBaseController {
      * 用户注册
      * @param mobile 手机号
      * @param password 密码
+     * @param tjUserId
      */
-    def register(String mobile, String password) {
+    def register(String mobile, String password, Integer tjUserId) {
         def map = [:]
         if (mobile && password) {
             def user = UserBase.findByMobile(mobile)
@@ -72,6 +73,11 @@ class UserBaseController {
                 user.mobile = mobile
                 user.password = DigestUtils.sha256Hex(password)
                 user.flag = 1 as Short
+                //推荐
+                def tjUser = UserBase.get(tjUserId)
+                if (tjUser) {
+                    user.tjUser = tjUser
+                }
                 user.save flush: true
                 //生成扩展实例
                 def userInfo = new UserInfo()
