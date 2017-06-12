@@ -122,6 +122,7 @@ class RuiShowService {
         postAccountHistory.ruiMoney = money
         postAccountHistory.reason = "收入"
         postAccountHistory.reasonType = 4
+        postAccountHistory.fromUser = userAccount.userBase
         postAccountHistory.save flush: true
     }
 
