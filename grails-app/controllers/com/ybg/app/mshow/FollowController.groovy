@@ -72,6 +72,34 @@ class FollowController {
     }
 
     /**
+     * 获取用户的关注
+     * @param token
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    def getFollowList(String token, Integer pageNum, Integer pageSize) {
+        def map = [:]
+        if (UserUtil.checkToken(token)) {
+            def userId = UserUtil.getUserId(token)
+            def userBase = UserBase.get(userId)
+            def followList = followService.getFollowList(userBase, pageNum, pageSize)
+
+            map.isSuccess = true
+            map.message = ""
+            map.errorCode = "0"
+            map.data = followList
+        } else {
+            map.isSuccess = false
+            map.message = "登录凭证失效，请重新登录"
+            map.errorCode = "1"
+            map.data = "false"
+        }
+
+        render map as JSON
+    }
+
+    /**
      * 获取指定用户的粉丝数量，即有多少人关注了该用户。
      * @param userId
      * @return
@@ -92,6 +120,32 @@ class FollowController {
             map.errorCode = "1"
             map.data = "false"
         }
+        render map as JSON
+    }
+
+    /**
+     * 获取用户的粉丝
+     * @param token
+     * @return
+     */
+    def getFansList(String token, Integer pageNum, Integer pageSize) {
+        def map = [:]
+        if (UserUtil.checkToken(token)) {
+            def userId = UserUtil.getUserId(token)
+            def userBase = UserBase.get(userId)
+            def followList = followService.getFansList(userBase, pageNum, pageSize)
+
+            map.isSuccess = true
+            map.message = ""
+            map.errorCode = "0"
+            map.data = followList
+        } else {
+            map.isSuccess = false
+            map.message = "登录凭证失效，请重新登录"
+            map.errorCode = "1"
+            map.data = "false"
+        }
+
         render map as JSON
     }
 

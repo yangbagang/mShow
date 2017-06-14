@@ -332,7 +332,12 @@ class RuiShowController {
             if (userBase) {
                 def show = RuiShow.get(showId)
                 if (show) {
-                    if (show.price > 0 && !showViewHistoryService.hasView(userBase, show)) {
+                    if (show.userBase == userBase || userBase.type > 0) {
+                        map.isSuccess = true
+                        map.message = "不需要付费或己经付过了"
+                        map.errorCode = ""
+                        map.data = "true"
+                    } else if (show.price > 0 && !showViewHistoryService.hasView(userBase, show)) {
                         map.isSuccess = true
                         map.message = "需要付费才能看"
                         map.errorCode = "4"

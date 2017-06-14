@@ -63,18 +63,6 @@ class UserBaseService {
                     userBase.flag = 0
                 }
             }
-            //计算美力值
-            def sum = 0
-            MeiLiHistory.findAllByUserBaseAndShowId(show.userBase, show.id).each { history ->
-                sum += history.score
-            }
-            userBase.ml = sum
-            def meiLi = UserMeiLi.findByUserBase(show.userBase)
-            if (meiLi) {
-                userBase.score = meiLi.meiLi
-            } else {
-                userBase.score = 0
-            }
         }
         userBase
     }

@@ -28,5 +28,6 @@ class UserBase {
     UserBase tjUser//推荐
     Date createTime = new Date()
     String appToken = ""
+    Integer type = 0
 
 }

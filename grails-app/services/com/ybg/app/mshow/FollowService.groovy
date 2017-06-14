@@ -16,4 +16,40 @@ class FollowService {
         }
     }
 
+    def getFollowList(UserBase userBase, Integer pageNum, Integer pageSize) {
+        def c = Follow.createCriteria()
+        def result = c.list(max: pageSize, offset: (pageNum - 1) * pageSize) {
+            eq("follow", userBase)
+            order("createTime", "desc")
+        }
+        def list = []
+        for (Follow follow in result) {
+            def map = [:]
+            map.id = follow.id
+            map.nickName = follow.userBase.nickName
+            map.avatar = follow.userBase.avatar
+            map.createTime = follow.createTime
+            list.add(map)
+        }
+        list
+    }
+
+    def getFansList(UserBase userBase, Integer pageNum, Integer pageSize) {
+        def c = Follow.createCriteria()
+        def result = c.list(max: pageSize, offset: (pageNum - 1) * pageSize) {
+            eq("userBase", userBase)
+            order("createTime", "desc")
+        }
+        def list = []
+        for (Follow follow in result) {
+            def map = [:]
+            map.id = follow.id
+            map.nickName = follow.follow.nickName
+            map.avatar = follow.follow.avatar
+            map.createTime = follow.createTime
+            list.add(map)
+        }
+        list
+    }
+
 }
